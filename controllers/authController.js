@@ -19,6 +19,10 @@ authController.post('/register', async (req, res) => {
         if (req.body.password !== req.body.repass) {
             throw new Error('Passwords do not match');
         }
+
+        if (req.body.password.length < 5) {
+            throw new Error('Password should be at least 5 characters long');
+        }
         const token = await register(req.body.username, req.body.password);
         res.cookie('token', token);
         res.redirect('/'); //TODO check asignment routing
