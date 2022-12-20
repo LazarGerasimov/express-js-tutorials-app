@@ -1,3 +1,4 @@
+const { body } = require('express-validator');
 const { register, login } = require('../services/userService');
 const { parseError } = require('../util/parser');
 
@@ -10,36 +11,42 @@ authController.get('/register', (req, res) => {
     });
 });
 
-authController.post('/register', async (req, res) => {
-    try {
-        // console.log(req.body);
-        if (req.body.username == '' || req.body.password == '') {
-            throw new Error('All fields are required');
-        }
-        if (req.body.password !== req.body.repass) {
-            throw new Error('Passwords do not match');
-        }
+authController.post('/register',
+    body('username').isLength({min: 5}).withMessage('Username must be at least 5 characters long'),
+    body('password').isLength({min: 5}).withMessage('Password must be at least 5 characters long'),
+    body('username').isAlphanumeric().withMessage('Username should contain only english letters and digits'),
+    body('password').isAlphanumeric().withMessage('Username should contain only english letters and digits'),
 
-        if (req.body.password.length < 5) {
-            throw new Error('Password should be at least 5 characters long');
-        }
-        const token = await register(req.body.username, req.body.password);
-        res.cookie('token', token);
-        res.redirect('/'); //TODO check asignment routing
-    } catch (error) {
-        // console.log(error);              // reveal if needed
-        const errors = parseError(error); //split error
-        //TODO add actual error display
-        res.render('register', {  // render page + error
-            title: 'Register Page',
-            errors,
-            body: {
-                username: req.body.username
+    async (req, res) => {
+        try {
+            // console.log(req.body);
+            if (req.body.username == '' || req.body.password == '') {
+                throw new Error('All fields are required');
             }
-        });
-    }
+            if (req.body.password.length < 5) {
+                throw new Error('Password should be at least 5 characters long');
+            }
+            if (req.body.password !== req.body.repass) {
+                throw new Error('Passwords do not match');
+            }
 
-});
+            const token = await register(req.body.username, req.body.password);
+            res.cookie('token', token);
+            res.redirect('/'); //TODO check asignment routing
+        } catch (error) {
+            // console.log(error);              // reveal if needed
+            const errors = parseError(error); //split error
+            //TODO add actual error display
+            res.render('register', {  // render page + error
+                title: 'Register Page',
+                errors,
+                body: {
+                    username: req.body.username
+                }
+            });
+        }
+
+    });
 
 authController.get('/login', (req, res) => {  // render view 
     res.render('login', {
@@ -62,7 +69,7 @@ authController.post('/login', async (req, res) => { // send req to db
             }
         });
     };
-}); 
+});
 
 authController.get('/logout', (req, res) => {
     res.clearCookie('token');
