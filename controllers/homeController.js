@@ -11,7 +11,7 @@ homeController.get('/', (req, res) => {
     } else {
         res.render('guest-home', {
             title: 'Guest Home',
-            
+
         })
     }
     
