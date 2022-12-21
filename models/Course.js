@@ -17,7 +17,8 @@ const courseSchema = new Schema({
     },
     duration: { type: String, required: true },
     createdAt: { type: String, required: true },
-    users: { type: [Types.ObjectId], ref: 'User', default: [] }
+    users: { type: [Types.ObjectId], ref: 'User', default: [] },
+    owner: { type: Types.ObjectId, ref: 'User' }
 });
 
 courseSchema.index({ title: 1 }, {      // to support search functionality
